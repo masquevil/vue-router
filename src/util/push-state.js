@@ -19,9 +19,7 @@ export const supportsPushState = inBrowser && (function () {
 })()
 
 // use User Timing api (if present) for more accurate key precision
-const Time = inBrowser && window.performance && window.performance.now
-  ? window.performance
-  : Date
+const Time = Date
 
 let _key: string = genKey()
 
@@ -44,7 +42,7 @@ export function pushState (url?: string, replace?: boolean) {
   const history = window.history
   try {
     if (replace) {
-      history.replaceState({ key: _key }, '', url)
+      history.replaceState(history.state, '', url)
     } else {
       _key = genKey()
       history.pushState({ key: _key }, '', url)
