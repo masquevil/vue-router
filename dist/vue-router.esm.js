@@ -1,5 +1,5 @@
 /*!
-  * vue-router v3.0.3
+  * vue-router v3.0.4
   * (c) 2018 Evan You
   * @license MIT
   */
@@ -362,7 +362,7 @@ var View = {
       }
       // currentKey for scroll
       if(cache[currentKey] && currentKey !== key$1){
-        if(cache[key$1].scrollTarget){ cache[currentKey].scroll = getScroll(cache[key$1].scrollTarget); }
+        if(cache[currentKey].scrollTarget){ cache[currentKey].scroll = getScroll(cache[key$1].scrollTarget); }
       }
       this.currentKey = key$1;
       if (cache[key$1]) {
@@ -2711,7 +2711,7 @@ function createHref (base, fullPath, mode) {
 }
 
 VueRouter.install = install;
-VueRouter.version = '3.0.3';
+VueRouter.version = '3.0.4';
 
 if (inBrowser && window.Vue) {
   window.Vue.use(VueRouter);
