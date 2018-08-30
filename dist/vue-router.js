@@ -1,5 +1,5 @@
 /*!
-  * vue-router v3.0.0
+  * vue-router v3.0.1
   * (c) 2018 Evan You
   * @license MIT
   */
@@ -2721,7 +2721,7 @@ function createHref (base, fullPath, mode) {
 }
 
 VueRouter.install = install;
-VueRouter.version = '3.0.0';
+VueRouter.version = '3.0.1';
 
 if (inBrowser && window.Vue) {
   window.Vue.use(VueRouter);
