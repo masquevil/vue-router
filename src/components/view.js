@@ -121,7 +121,7 @@ export default {
       }
       // currentKey for scroll
       if(cache[currentKey] && currentKey !== key){
-        if(cache[currentKey].scrollTarget)cache[currentKey].scroll = getScroll(cache[key].scrollTarget);
+        if(cache[currentKey].scrollTarget)cache[currentKey].scroll = getScroll(cache[currentKey].scrollTarget);
       }
       this.currentKey = key;
       if (cache[key]) {
