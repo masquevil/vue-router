@@ -121,10 +121,7 @@ export default {
       }
       // currentKey for scroll
       if(cache[currentKey] && currentKey !== key){
-        if(!this.hasOwnProperty('scrollTarget')){
-          this.scrollTarget = getViewScrollTarget(this.$el);
-        }
-        if(this.scrollTarget)cache[currentKey].scroll = getScroll(this.scrollTarget);
+        if(cache[key].scrollTarget)cache[currentKey].scroll = getScroll(cache[key].scrollTarget);
       }
       this.currentKey = key;
       if (cache[key]) {
@@ -134,12 +131,13 @@ export default {
         // scroll
         if(cache[key].scroll){
           this.$nextTick(() => {
-            this.scrollTarget.scrollTo(cache[key].scroll);
+            cache[key].scrollTarget.scrollTo(cache[key].scroll);
           });
         }
       } else {
         cache[key] = {
           scroll: false,
+          scrollTarget: getViewScrollTarget(this.$el),
           vnode: vnode
         };
         keys.push(key);

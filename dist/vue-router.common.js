@@ -268,8 +268,6 @@ var View = {
     }
   },
   render: function render (_) {
-    var this$1 = this;
-
     var children = this.$slots.default;
     var data = {};
     // used by devtools to display a router-view badge
@@ -366,10 +364,7 @@ var View = {
       }
       // currentKey for scroll
       if(cache[currentKey] && currentKey !== key$1){
-        if(!this.hasOwnProperty('scrollTarget')){
-          this.scrollTarget = getViewScrollTarget(this.$el);
-        }
-        if(this.scrollTarget){ cache[currentKey].scroll = getScroll(this.scrollTarget); }
+        if(cache[key$1].scrollTarget){ cache[currentKey].scroll = getScroll(cache[key$1].scrollTarget); }
       }
       this.currentKey = key$1;
       if (cache[key$1]) {
@@ -379,12 +374,13 @@ var View = {
         // scroll
         if(cache[key$1].scroll){
           this.$nextTick(function () {
-            this$1.scrollTarget.scrollTo(cache[key$1].scroll);
+            cache[key$1].scrollTarget.scrollTo(cache[key$1].scroll);
           });
         }
       } else {
         cache[key$1] = {
           scroll: false,
+          scrollTarget: getViewScrollTarget(this.$el),
           vnode: vnode
         };
         keys.push(key$1);
