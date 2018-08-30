@@ -1,7 +1,7 @@
 /* @flow */
 
 import { inBrowser } from './dom'
-import { saveScrollPosition } from './scroll'
+// import { saveScrollPosition } from './scroll'
 
 export const supportsPushState = inBrowser && (function () {
   const ua = window.navigator.userAgent
@@ -36,7 +36,7 @@ export function setStateKey (key: string) {
 }
 
 export function pushState (url?: string, replace?: boolean) {
-  saveScrollPosition()
+  // saveScrollPosition()
   // try...catch the pushState call to get around Safari
   // DOM Exception 18 where it limits to 100 pushState calls
   const history = window.history

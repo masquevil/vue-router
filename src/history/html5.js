@@ -4,19 +4,19 @@ import type Router from '../index'
 import { History } from './base'
 import { cleanPath } from '../util/path'
 import { START } from '../util/route'
-import { setupScroll, handleScroll } from '../util/scroll'
+// import { setupScroll, handleScroll } from '../util/scroll'
 import { pushState, replaceState, supportsPushState } from '../util/push-state'
 
 export class HTML5History extends History {
   constructor (router: Router, base: ?string) {
     super(router, base)
 
-    const expectScroll = router.options.scrollBehavior
-    const supportsScroll = supportsPushState && expectScroll
-
-    if (supportsScroll) {
-      setupScroll()
-    }
+    // const expectScroll = router.options.scrollBehavior
+    // const supportsScroll = supportsPushState && expectScroll
+    //
+    // if (supportsScroll) {
+    //   setupScroll()
+    // }
 
     const initLocation = getLocation(this.base)
     window.addEventListener('popstate', e => {
@@ -30,9 +30,9 @@ export class HTML5History extends History {
       }
 
       this.transitionTo(location, route => {
-        if (supportsScroll) {
-          handleScroll(router, route, current, true)
-        }
+        // if (supportsScroll) {
+        //   handleScroll(router, route, current, true)
+        // }
       })
     })
   }
@@ -45,7 +45,7 @@ export class HTML5History extends History {
     const { current: fromRoute } = this
     this.transitionTo(location, route => {
       pushState(cleanPath(this.base + route.fullPath))
-      handleScroll(this.router, route, fromRoute, false)
+      // handleScroll(this.router, route, fromRoute, false)
       onComplete && onComplete(route)
     }, onAbort)
   }
@@ -54,7 +54,7 @@ export class HTML5History extends History {
     const { current: fromRoute } = this
     this.transitionTo(location, route => {
       replaceState(cleanPath(this.base + route.fullPath))
-      handleScroll(this.router, route, fromRoute, false)
+      // handleScroll(this.router, route, fromRoute, false)
       onComplete && onComplete(route)
     }, onAbort)
   }

@@ -4,7 +4,7 @@ import type Router from '../index'
 import { History } from './base'
 import { cleanPath } from '../util/path'
 import { getLocation } from './html5'
-import { setupScroll, handleScroll } from '../util/scroll'
+// import { setupScroll, handleScroll } from '../util/scroll'
 import { pushState, replaceState, supportsPushState } from '../util/push-state'
 
 export class HashHistory extends History {
@@ -21,12 +21,12 @@ export class HashHistory extends History {
   // to avoid the hashchange listener being fired too early
   setupListeners () {
     const router = this.router
-    const expectScroll = router.options.scrollBehavior
-    const supportsScroll = supportsPushState && expectScroll
-
-    if (supportsScroll) {
-      setupScroll()
-    }
+    // const expectScroll = router.options.scrollBehavior
+    // const supportsScroll = supportsPushState && expectScroll
+    //
+    // if (supportsScroll) {
+    //   setupScroll()
+    // }
 
     window.addEventListener(supportsPushState ? 'popstate' : 'hashchange', () => {
       const current = this.current
@@ -34,9 +34,9 @@ export class HashHistory extends History {
         return
       }
       this.transitionTo(getHash(), route => {
-        if (supportsScroll) {
-          handleScroll(this.router, route, current, true)
-        }
+        // if (supportsScroll) {
+        //   handleScroll(this.router, route, current, true)
+        // }
         if (!supportsPushState) {
           replaceHash(route.fullPath)
         }
@@ -48,7 +48,7 @@ export class HashHistory extends History {
     const { current: fromRoute } = this
     this.transitionTo(location, route => {
       pushHash(route.fullPath)
-      handleScroll(this.router, route, fromRoute, false)
+      // handleScroll(this.router, route, fromRoute, false)
       onComplete && onComplete(route)
     }, onAbort)
   }
@@ -57,7 +57,7 @@ export class HashHistory extends History {
     const { current: fromRoute } = this
     this.transitionTo(location, route => {
       replaceHash(route.fullPath)
-      handleScroll(this.router, route, fromRoute, false)
+      // handleScroll(this.router, route, fromRoute, false)
       onComplete && onComplete(route)
     }, onAbort)
   }
