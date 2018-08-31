@@ -266,6 +266,8 @@ var View = {
     }
   },
   render: function render (_) {
+    var this$1 = this;
+
     var children = this.$slots.default;
     var data = {};
     // used by devtools to display a router-view badge
@@ -274,7 +276,7 @@ var View = {
     // directly use parent context's createElement() function
     // so that components rendered by router-view can resolve named slots
     var parent = this.$parent;
-    var h = parent.$createElement;
+    var h = this.$createElement;
     var name = this.name;
     var route = this.$route;
     var rvCache = this._routerViewCache || (this._routerViewCache = {});
@@ -357,39 +359,46 @@ var View = {
           (window.history.state || {}).key || 'null',
           componentOptions.Ctor.cid,
           'props|' + (Object.entries(propsToPass || {}).map(function (item) { return item.join('='); }).join('&') || 'null') ].join('::');
-        // key = 'router-alive::' + ((history.state || {}).key || 'null');
         vnode.key = key$1;
       }
-      // currentKey for scroll
-      if(cache[currentKey] && currentKey !== key$1){
-        if(cache[currentKey].scrollTarget){ cache[currentKey].scroll = getScroll(cache[currentKey].scrollTarget); }
-      }
-      this.currentKey = key$1;
       if (cache[key$1]) {
-        vnode.componentInstance = cache[key$1].vnode.componentInstance;
+        var cached = cache[key$1];
+        vnode.componentInstance = cached.vnode.componentInstance;
         remove(keys, key$1);
         keys.push(key$1);
-        // scroll
-        if(cache[key$1].scroll){
-          this.$nextTick(function () {
-            cache[key$1].scrollTarget.scrollTo(cache[key$1].scroll);
-          });
-        }
+        this.setScroll(cached);
       } else {
-        cache[key$1] = {
+        var cached$1 = cache[key$1] = {
           scroll: false,
-          scrollTarget: getViewScrollTarget(this.$el),
           vnode: vnode
         };
+        this.$nextTick(function () {
+          cached$1.scrollTarget = getViewScrollTarget(this$1.$el);
+        });
         keys.push(key$1);
         // prune oldest entry
         if (this.max && keys.length > parseInt(this.max)) {
           pruneCacheEntry(cache, keys[0], keys, this._vnode);
         }
       }
+      this.currentKey = key$1;
       vnode.data.keepAlive = true;
     }
     return vnode;
+  },
+  methods: {
+    saveScroll: function saveScroll(){
+      var current = this.cache[this.currentKey];
+      if(current.scrollTarget){ current.scroll = getScroll(current.scrollTarget); }
+    },
+    setScroll: function setScroll(cached){
+      this.$nextTick(function () {
+        if(cached.scrollTarget && cached.scroll){
+          cached.scrollTarget.scrollTo(cached.scroll);
+          cached.scroll = false;
+        }
+      });
+    }
   }
 }
 
@@ -836,6 +845,17 @@ function install (Vue) {
     },
     destroyed: function destroyed () {
       registerInstance(this);
+    }
+  });
+
+  Vue.mixin({
+    beforeRouteUpdate: function beforeRouteUpdate (to, from, next) {
+      this.$parent.saveScroll();
+      next();
+    },
+    beforeRouteLeave: function beforeRouteLeave (to, from, next) {
+      this.$parent.saveScroll();
+      next();
     }
   });
 

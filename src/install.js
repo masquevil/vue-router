@@ -35,6 +35,17 @@ export function install (Vue) {
     }
   })
 
+  Vue.mixin({
+    beforeRouteUpdate (to, from, next) {
+      this.$parent.saveScroll();
+      next();
+    },
+    beforeRouteLeave (to, from, next) {
+      this.$parent.saveScroll();
+      next();
+    }
+  })
+
   Object.defineProperty(Vue.prototype, '$router', {
     get () { return this._routerRoot._router }
   })

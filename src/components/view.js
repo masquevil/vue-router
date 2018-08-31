@@ -28,14 +28,14 @@ export default {
   },
   render (_) {
     const children = this.$slots.default
-    const data = {}
+    const data = {};
     // used by devtools to display a router-view badge
     data.routerView = true
 
     // directly use parent context's createElement() function
     // so that components rendered by router-view can resolve named slots
     let parent = this.$parent
-    const h = parent.$createElement
+    const h = this.$createElement
     const name = this.name
     const route = this.$route
     const rvCache = this._routerViewCache || (this._routerViewCache = {})
@@ -116,39 +116,46 @@ export default {
           componentOptions.Ctor.cid,
           'props|' + (Object.entries(propsToPass || {}).map(item => item.join('=')).join('&') || 'null'),
         ].join('::');
-        // key = 'router-alive::' + ((history.state || {}).key || 'null');
         vnode.key = key;
       }
-      // currentKey for scroll
-      if(cache[currentKey] && currentKey !== key){
-        if(cache[currentKey].scrollTarget)cache[currentKey].scroll = getScroll(cache[currentKey].scrollTarget);
-      }
-      this.currentKey = key;
       if (cache[key]) {
-        vnode.componentInstance = cache[key].vnode.componentInstance;
+        let cached = cache[key];
+        vnode.componentInstance = cached.vnode.componentInstance;
         remove(keys, key);
         keys.push(key);
-        // scroll
-        if(cache[key].scroll){
-          this.$nextTick(() => {
-            cache[key].scrollTarget.scrollTo(cache[key].scroll);
-          });
-        }
+        this.setScroll(cached);
       } else {
-        cache[key] = {
+        let cached = cache[key] = {
           scroll: false,
-          scrollTarget: getViewScrollTarget(this.$el),
           vnode: vnode
         };
+        this.$nextTick(() => {
+          cached.scrollTarget = getViewScrollTarget(this.$el);
+        });
         keys.push(key);
         // prune oldest entry
         if (this.max && keys.length > parseInt(this.max)) {
           pruneCacheEntry(cache, keys[0], keys, this._vnode)
         }
       }
+      this.currentKey = key;
       vnode.data.keepAlive = true;
     }
     return vnode;
+  },
+  methods: {
+    saveScroll(){
+      let current = this.cache[this.currentKey];
+      if(current.scrollTarget)current.scroll = getScroll(current.scrollTarget);
+    },
+    setScroll(cached){
+      this.$nextTick(() => {
+        if(cached.scrollTarget && cached.scroll){
+          cached.scrollTarget.scrollTo(cached.scroll);
+          cached.scroll = false;
+        }
+      });
+    }
   }
 }
 
