@@ -1,4 +1,4 @@
-# vue-router [![Build Status](https://img.shields.io/circleci/project/masquevil/vue-state-router/dev.svg)](https://circleci.com/gh/masquevil/vue-state-router)
+# vue-state-router [![Build Status](https://img.shields.io/circleci/project/masquevil/vue-state-router/dev.svg)](https://circleci.com/gh/masquevil/vue-state-router)
 
 > This is vue-state-router 2.0 which works only with Vue 2.0. For the 1.x router see the [1.0 branch](https://github.com/vuejs/vue-router/tree/1.0).
 
