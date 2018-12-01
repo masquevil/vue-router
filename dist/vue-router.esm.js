@@ -1,5 +1,5 @@
 /*!
-  * vue-router v3.0.6
+  * vue-router v3.0.7
   * (c) 2018 Evan You
   * @license MIT
   */
@@ -224,7 +224,10 @@ function getViewScrollTarget(element) {
       return element;
     }
     element = element.parentNode;
-    if(element.__vue__ && element.__vue__.$vnode.data.routerView){ return false; }
+    try {
+      if(element.__vue__.$vnode.data.routerView){ return false; }
+    } catch(e) {}
+    // if(element.__vue__ && element.__vue__.$vnode.data.routerView)return false;
   }
   return window;
 }
@@ -2731,7 +2734,7 @@ function createHref (base, fullPath, mode) {
 }
 
 VueRouter.install = install;
-VueRouter.version = '3.0.6';
+VueRouter.version = '3.0.7';
 
 if (inBrowser && window.Vue) {
   window.Vue.use(VueRouter);

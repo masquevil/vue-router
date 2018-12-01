@@ -138,7 +138,10 @@ export function getViewScrollTarget(element) {
       return element;
     }
     element = element.parentNode;
-    if(element.__vue__ && element.__vue__.$vnode.data.routerView)return false;
+    try {
+      if(element.__vue__.$vnode.data.routerView)return false;
+    } catch(e) {}
+    // if(element.__vue__ && element.__vue__.$vnode.data.routerView)return false;
   }
   return window;
 }
