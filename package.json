@@ -1,6 +1,6 @@
 {
   "name": "vue-state-router",
-  "version": "3.0.6",
+  "version": "3.0.7",
   "description": "A better version for official vue-router@3",
   "author": [
     "Evan You",
