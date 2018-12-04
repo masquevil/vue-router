@@ -1,5 +1,5 @@
 /*!
-  * vue-router v3.0.8
+  * vue-router v3.0.9
   * (c) 2018 Evan You
   * @license MIT
   */
@@ -560,6 +560,7 @@ function createRoute (
     meta: (record && record.meta) || {},
     path: location.path || '/',
     hash: location.hash || '',
+    replace: location.replace || false,
     query: query,
     params: location.params || {},
     fullPath: getFullPath(location, stringifyQuery$$1),
@@ -850,14 +851,14 @@ function install (Vue) {
   });
 
   Vue.mixin({
-    beforeRouteUpdate: function beforeRouteUpdate (to, from, next) {
+    beforeRouteUpdate: [function(to, from, next) {
       this.$parent.saveScroll();
       next();
-    },
-    beforeRouteLeave: function beforeRouteLeave (to, from, next) {
+    }],
+    beforeRouteLeave: [function(to, from, next) {
       this.$parent.saveScroll();
       next();
-    }
+    }]
   });
 
   Object.defineProperty(Vue.prototype, '$router', {
@@ -2312,6 +2313,11 @@ var HTML5History = /*@__PURE__*/(function (History$$1) {
 
     var ref = this;
     var fromRoute = ref.current;
+    if(typeof(location) === 'string') {
+      location = { path: location, replace: true };
+    } else {
+      location.replace = true;
+    }
     this.transitionTo(location, function (route) {
       replaceState(cleanPath(this$1.base + route.fullPath));
       // handleScroll(this.router, route, fromRoute, false)
@@ -2399,6 +2405,11 @@ var HashHistory = /*@__PURE__*/(function (History$$1) {
   HashHistory.prototype.replace = function replace (location, onComplete, onAbort) {
     var ref = this;
     var fromRoute = ref.current;
+    if(typeof(location) === 'string') {
+      location = { path: location, replace: true };
+    } else {
+      location.replace = true;
+    }
     this.transitionTo(location, function (route) {
       replaceHash(route.fullPath);
       // handleScroll(this.router, route, fromRoute, false)
@@ -2732,7 +2743,7 @@ function createHref (base, fullPath, mode) {
 }
 
 VueRouter.install = install;
-VueRouter.version = '3.0.8';
+VueRouter.version = '3.0.9';
 
 if (inBrowser && window.Vue) {
   window.Vue.use(VueRouter);
