@@ -55,6 +55,11 @@ export class HashHistory extends History {
 
   replace (location: RawLocation, onComplete?: Function, onAbort?: Function) {
     const { current: fromRoute } = this
+    if(typeof(location) === 'string') {
+      location = { path: location, replace: true };
+    } else {
+      location.replace = true;
+    }
     this.transitionTo(location, route => {
       replaceHash(route.fullPath)
       // handleScroll(this.router, route, fromRoute, false)

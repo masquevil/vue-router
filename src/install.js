@@ -36,14 +36,14 @@ export function install (Vue) {
   })
 
   Vue.mixin({
-    beforeRouteUpdate (to, from, next) {
+    beforeRouteUpdate: [function(to, from, next) {
       this.$parent.saveScroll();
       next();
-    },
-    beforeRouteLeave (to, from, next) {
+    }],
+    beforeRouteLeave: [function(to, from, next) {
       this.$parent.saveScroll();
       next();
-    }
+    }]
   })
 
   Object.defineProperty(Vue.prototype, '$router', {
