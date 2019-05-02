@@ -1,9 +1,9 @@
 module.exports = {
   'nested routes': function (browser) {
     browser
-    .url('http://localhost:8080/nested-routes/')
+      .url('http://localhost:8080/nested-routes/')
       .waitForElementVisible('#app', 1000)
-      .assert.count('li a', 9)
+      .assert.count('li a', 11)
       .assert.urlEquals('http://localhost:8080/nested-routes/parent')
       .assert.containsText('.view', 'Parent')
       .assert.containsText('.view', 'default')
@@ -70,12 +70,19 @@ module.exports = {
         return (zapId === '2')
       }, null, 'relative params')
 
+      .click('li:nth-child(10) a')
+      .assert.urlEquals('http://localhost:8080/nested-routes/parent/qux/1/quux')
+      .click('li:nth-child(11) a')
+      .assert.urlEquals('http://localhost:8080/nested-routes/parent/qux/2/quux')
+      .click('.nested-child a')
+      .assert.urlEquals('http://localhost:8080/nested-routes/parent/qux/2/quuy')
+
     // check initial visit
-    .url('http://localhost:8080/nested-routes/parent/foo')
+      .url('http://localhost:8080/nested-routes/parent/foo')
       .waitForElementVisible('#app', 1000)
       .assert.containsText('.view', 'Parent')
       .assert.containsText('.view', 'foo')
-    .url('http://localhost:8080/nested-routes/baz')
+      .url('http://localhost:8080/nested-routes/baz')
       .waitForElementVisible('#app', 1000)
       .assert.containsText('.view', 'Parent')
       .assert.containsText('.view', 'baz')
