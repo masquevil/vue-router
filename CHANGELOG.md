@@ -1,3 +1,31 @@
+## [3.0.12](https://github.com/masquevil/vue-router/compare/v3.0.9...v3.0.12) (2019-05-02)
+
+
+### Bug Fixes
+
+* prevent memory leaks by removing app references ([#2706](https://github.com/masquevil/vue-router/issues/2706)) ([8056105](https://github.com/masquevil/vue-router/commit/8056105)), closes [#2639](https://github.com/masquevil/vue-router/issues/2639)
+* push before creating Vue instance ([#2713](https://github.com/masquevil/vue-router/issues/2713)) ([6974a6f](https://github.com/masquevil/vue-router/commit/6974a6f)), closes [#2712](https://github.com/masquevil/vue-router/issues/2712)
+* removes warning resolving asterisk routes ([e224637](https://github.com/masquevil/vue-router/commit/e224637)), closes [#2505](https://github.com/masquevil/vue-router/issues/2505) [#2505](https://github.com/masquevil/vue-router/issues/2505)
+* **normalizeLocation:** create a copy with named locations ([#2286](https://github.com/masquevil/vue-router/issues/2286)) ([53cce99](https://github.com/masquevil/vue-router/commit/53cce99)), closes [#2121](https://github.com/masquevil/vue-router/issues/2121)
+* **nothing:** change version ([8969119](https://github.com/masquevil/vue-router/commit/8969119))
+* **resolve:** use current location if not provided ([#2390](https://github.com/masquevil/vue-router/issues/2390)) ([7ff4de4](https://github.com/masquevil/vue-router/commit/7ff4de4)), closes [#2385](https://github.com/masquevil/vue-router/issues/2385)
+* **router-view:** 修复多级 router-view 嵌套时视图被反复创建的 bug ([86eee8e](https://github.com/masquevil/vue-router/commit/86eee8e))
+* **router-view:** add condition to see whether the tree is inactive (fix [#2552](https://github.com/masquevil/vue-router/issues/2552)) ([#2592](https://github.com/masquevil/vue-router/issues/2592)) ([e6d8fd2](https://github.com/masquevil/vue-router/commit/e6d8fd2))
+* **router-view:** register instance in init hook ([c3abdf6](https://github.com/masquevil/vue-router/commit/c3abdf6)), closes [#2561](https://github.com/masquevil/vue-router/issues/2561) [#2689](https://github.com/masquevil/vue-router/issues/2689) [#2561](https://github.com/masquevil/vue-router/issues/2561) [#2561](https://github.com/masquevil/vue-router/issues/2561)
+* **state:** 修复刷新后后退的bug ([d09b51a](https://github.com/masquevil/vue-router/commit/d09b51a))
+* **state:** 修复刷新后后退的bug ([425560d](https://github.com/masquevil/vue-router/commit/425560d))
+* **types:** allow null/undefined in query params ([ca30a75](https://github.com/masquevil/vue-router/commit/ca30a75)), closes [#2605](https://github.com/masquevil/vue-router/issues/2605)
+* revert [#2713](https://github.com/masquevil/vue-router/issues/2713) ([#2723](https://github.com/masquevil/vue-router/issues/2723)) ([ec6eab7](https://github.com/masquevil/vue-router/commit/ec6eab7)), closes [#2719](https://github.com/masquevil/vue-router/issues/2719)
+
+
+### Features
+
+* **esm build:** build ES modules for browser ([#2705](https://github.com/masquevil/vue-router/issues/2705)) ([627027f](https://github.com/masquevil/vue-router/commit/627027f))
+* **nothing:** version ([97e0aaa](https://github.com/masquevil/vue-router/commit/97e0aaa))
+* **nothing:** version ([0c7db46](https://github.com/masquevil/vue-router/commit/0c7db46))
+
+
+
 # [3.0.11](https://github.com/masquevil/vue-state-router/compare/v3.0.3...v3.0.11) (2018-11-23)
 
 ### Bug Fixes
