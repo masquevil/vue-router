@@ -6,6 +6,8 @@ import { inBrowser } from '../util/dom'
 import { runQueue } from '../util/async'
 import { warn, isError } from '../util/warn'
 import { START, isSameRoute } from '../util/route'
+import { supportsPushState } from '../util/push-state'
+import { setupScroll } from '../util/scroll'
 import {
   flatten,
   flatMapComponents,
@@ -40,6 +42,9 @@ export class History {
     this.readyCbs = []
     this.readyErrorCbs = []
     this.errorCbs = []
+    if (supportsPushState) {
+      setupScroll()
+    }
   }
 
   listen (cb: Function) {

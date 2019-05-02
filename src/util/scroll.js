@@ -1,23 +1,24 @@
 /* @flow */
 
-import type Router from '../index'
-import { assert } from './warn'
+// import type Router from '../index'
+// import { assert } from './warn'
 import { getStateKey, setStateKey } from './push-state'
 
-const positionStore = Object.create(null)
+// const positionStore = Object.create(null)
 
 export function setupScroll () {
   // Fix for #1585 for Firefox
   // Fix for #2195 Add optional third attribute to workaround a bug in safari https://bugs.webkit.org/show_bug.cgi?id=182678
   window.history.replaceState({ key: getStateKey() }, '', window.location.href.replace(window.location.origin, ''))
   window.addEventListener('popstate', e => {
-    saveScrollPosition()
+    // saveScrollPosition()
     if (e.state && e.state.key) {
       setStateKey(e.state.key)
     }
   })
 }
 
+/*
 export function handleScroll (
   router: Router,
   to: Route,
@@ -127,4 +128,30 @@ function scrollToPosition (shouldScroll, position) {
   if (position) {
     window.scrollTo(position.x, position.y)
   }
+}
+*/
+
+export function getViewScrollTarget (element) {
+  while (element && element.tagName !== 'HTML' && element.tagName !== 'BODY' && element.nodeType === 1) {
+    var overflowY = window.getComputedStyle(element, null).overflowY
+    if (overflowY === 'scroll' || overflowY === 'auto') {
+      return element
+    }
+    element = element.parentNode
+    try {
+      if (element.__vue__.$vnode.data.routerView) return false
+    } catch (e) {}
+    // if(element.__vue__ && element.__vue__.$vnode.data.routerView)return false;
+  }
+  return window
+}
+
+export function getScroll (element) {
+  return element === window ? ({
+    top: window.pageYOffset || document.documentElement.scrollTop || 0,
+    left: window.pageXOffset || document.documentElement.scrollLeft || 0
+  }) : ({
+    top: element.scrollTop,
+    left: element.scrollLeft
+  })
 }

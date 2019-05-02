@@ -1,5 +1,5 @@
 /*!
-  * vue-router v3.0.6
+  * vue-router v3.0.11
   * (c) 2019 Evan You
   * @license MIT
   */
@@ -30,30 +30,261 @@ function extend (a, b) {
   return a
 }
 
+/*  */
+
+var inBrowser = typeof window !== 'undefined';
+
+/*  */
+// import { saveScrollPosition } from './scroll'
+
+var supportsPushState = inBrowser && (function () {
+  var ua = window.navigator.userAgent;
+
+  if (
+    (ua.indexOf('Android 2.') !== -1 || ua.indexOf('Android 4.0') !== -1) &&
+    ua.indexOf('Mobile Safari') !== -1 &&
+    ua.indexOf('Chrome') === -1 &&
+    ua.indexOf('Windows Phone') === -1
+  ) {
+    return false
+  }
+
+  return window.history && 'pushState' in window.history
+})();
+
+// use User Timing api (if present) for more accurate key precision
+var Time = Date;
+
+var _key = genKey();
+
+function genKey () {
+  return Time.now().toFixed(3)
+}
+
+function getStateKey () {
+  return _key
+}
+
+function setStateKey (key) {
+  _key = key;
+}
+
+function pushState (url, replace) {
+  // saveScrollPosition()
+  // try...catch the pushState call to get around Safari
+  // DOM Exception 18 where it limits to 100 pushState calls
+  var history = window.history;
+  try {
+    if (replace) {
+      history.replaceState(history.state, '', url);
+    } else {
+      _key = genKey();
+      history.pushState({ key: _key }, '', url);
+    }
+  } catch (e) {
+    window.location[replace ? 'replace' : 'assign'](url);
+  }
+}
+
+function replaceState (url) {
+  pushState(url, true);
+}
+
+/*  */
+
+// const positionStore = Object.create(null)
+
+function setupScroll () {
+  // Fix for #1585 for Firefox
+  // Fix for #2195 Add optional third attribute to workaround a bug in safari https://bugs.webkit.org/show_bug.cgi?id=182678
+  window.history.replaceState({ key: getStateKey() }, '', window.location.href.replace(window.location.origin, ''));
+  window.addEventListener('popstate', function (e) {
+    // saveScrollPosition()
+    if (e.state && e.state.key) {
+      setStateKey(e.state.key);
+    }
+  });
+}
+
+/*
+export function handleScroll (
+  router: Router,
+  to: Route,
+  from: Route,
+  isPop: boolean
+) {
+  if (!router.app) {
+    return
+  }
+
+  const behavior = router.options.scrollBehavior
+  if (!behavior) {
+    return
+  }
+
+  if (process.env.NODE_ENV !== 'production') {
+    assert(typeof behavior === 'function', `scrollBehavior must be a function`)
+  }
+
+  // wait until re-render finishes before scrolling
+  router.app.$nextTick(() => {
+    const position = getScrollPosition()
+    const shouldScroll = behavior.call(router, to, from, isPop ? position : null)
+
+    if (!shouldScroll) {
+      return
+    }
+
+    if (typeof shouldScroll.then === 'function') {
+      shouldScroll.then(shouldScroll => {
+        scrollToPosition((shouldScroll: any), position)
+      }).catch(err => {
+        if (process.env.NODE_ENV !== 'production') {
+          assert(false, err.toString())
+        }
+      })
+    } else {
+      scrollToPosition(shouldScroll, position)
+    }
+  })
+}
+
+export function saveScrollPosition () {
+  const key = getStateKey()
+  if (key) {
+    positionStore[key] = {
+      x: window.pageXOffset,
+      y: window.pageYOffset
+    }
+  }
+}
+
+function getScrollPosition (): ?Object {
+  const key = getStateKey()
+  if (key) {
+    return positionStore[key]
+  }
+}
+
+function getElementPosition (el: Element, offset: Object): Object {
+  const docEl: any = document.documentElement
+  const docRect = docEl.getBoundingClientRect()
+  const elRect = el.getBoundingClientRect()
+  return {
+    x: elRect.left - docRect.left - offset.x,
+    y: elRect.top - docRect.top - offset.y
+  }
+}
+
+function isValidPosition (obj: Object): boolean {
+  return isNumber(obj.x) || isNumber(obj.y)
+}
+
+function normalizePosition (obj: Object): Object {
+  return {
+    x: isNumber(obj.x) ? obj.x : window.pageXOffset,
+    y: isNumber(obj.y) ? obj.y : window.pageYOffset
+  }
+}
+
+function normalizeOffset (obj: Object): Object {
+  return {
+    x: isNumber(obj.x) ? obj.x : 0,
+    y: isNumber(obj.y) ? obj.y : 0
+  }
+}
+
+function isNumber (v: any): boolean {
+  return typeof v === 'number'
+}
+
+function scrollToPosition (shouldScroll, position) {
+  const isObject = typeof shouldScroll === 'object'
+  if (isObject && typeof shouldScroll.selector === 'string') {
+    const el = document.querySelector(shouldScroll.selector)
+    if (el) {
+      let offset = shouldScroll.offset && typeof shouldScroll.offset === 'object' ? shouldScroll.offset : {}
+      offset = normalizeOffset(offset)
+      position = getElementPosition(el, offset)
+    } else if (isValidPosition(shouldScroll)) {
+      position = normalizePosition(shouldScroll)
+    }
+  } else if (isObject && isValidPosition(shouldScroll)) {
+    position = normalizePosition(shouldScroll)
+  }
+
+  if (position) {
+    window.scrollTo(position.x, position.y)
+  }
+}
+*/
+
+function getViewScrollTarget (element) {
+  while (element && element.tagName !== 'HTML' && element.tagName !== 'BODY' && element.nodeType === 1) {
+    var overflowY = window.getComputedStyle(element, null).overflowY;
+    if (overflowY === 'scroll' || overflowY === 'auto') {
+      return element
+    }
+    element = element.parentNode;
+    try {
+      if (element.__vue__.$vnode.data.routerView) { return false }
+    } catch (e) {}
+    // if(element.__vue__ && element.__vue__.$vnode.data.routerView)return false;
+  }
+  return window
+}
+
+function getScroll (element) {
+  return element === window ? ({
+    top: window.pageYOffset || document.documentElement.scrollTop || 0,
+    left: window.pageXOffset || document.documentElement.scrollLeft || 0
+  }) : ({
+    top: element.scrollTop,
+    left: element.scrollLeft
+  })
+}
+
 var View = {
   name: 'RouterView',
-  functional: true,
   props: {
     name: {
       type: String,
       default: 'default'
+    },
+    max: {
+      type: Number,
+      default: 0
     }
   },
-  render: function render (_, ref) {
-    var props = ref.props;
-    var children = ref.children;
-    var parent = ref.parent;
-    var data = ref.data;
+  created: function created () {
+    extend(this, {
+      cache: Object.create(null),
+      keys: [],
+      currentKey: ''
+    });
+  },
+  destroyed: function destroyed () {
+    var this$1 = this;
 
+    for (var key in this$1.cache) {
+      pruneCacheEntry(this$1.cache, key, this$1.keys);
+    }
+  },
+  render: function render (_) {
+    var this$1 = this;
+
+    var children = this.$slots.default;
+    var data = {};
     // used by devtools to display a router-view badge
     data.routerView = true;
 
     // directly use parent context's createElement() function
     // so that components rendered by router-view can resolve named slots
-    var h = parent.$createElement;
-    var name = props.name;
-    var route = parent.$route;
-    var cache = parent._routerViewCache || (parent._routerViewCache = {});
+    var parent = this.$parent;
+    var h = this.$createElement;
+    var name = this.name;
+    var route = this.$route;
+    var rvCache = this._routerViewCache || (this._routerViewCache = {});
 
     // determine current view depth, also check to see if the tree
     // has been toggled inactive but kept-alive.
@@ -75,17 +306,19 @@ var View = {
 
     // render previous view if the tree is inactive and kept-alive
     if (inactive) {
-      return h(cache[name], data, children)
+      var vnode$1 = h(rvCache[name], data, children);
+      vnode$1.key = this.currentKey;
+      return vnode$1
     }
 
     var matched = route.matched[depth];
     // render empty node if no matched route
     if (!matched) {
-      cache[name] = null;
+      rvCache[name] = null;
       return h()
     }
 
-    var component = cache[name] = matched.components[name];
+    var component = rvCache[name] = matched.components[name];
 
     // attach instance registration hook
     // this will be called in the instance's injected lifecycle hooks
@@ -98,11 +331,11 @@ var View = {
       ) {
         matched.instances[name] = val;
       }
-    }
+    };
 
     // also register instance in prepatch hook
     // in case the same component instance is reused across different routes
-    ;(data.hook || (data.hook = {})).prepatch = function (_, vnode) {
+    (data.hook || (data.hook = {})).prepatch = function (_, vnode) {
       matched.instances[name] = vnode.componentInstance;
     };
 
@@ -118,7 +351,7 @@ var View = {
     };
 
     // resolve props
-    var propsToPass = data.props = resolveProps(route, matched.props && matched.props[name]);
+    var propsToPass = data.props = extend(resolveProps(route, matched.props && matched.props[name]), this.$attrs);
     if (propsToPass) {
       // clone to prevent mutation
       propsToPass = data.props = extend({}, propsToPass);
@@ -132,8 +365,80 @@ var View = {
       }
     }
 
-    return h(component, data, children)
+    var vnode = h(component, data, children);
+    var componentOptions = vnode && vnode.componentOptions;
+    if (componentOptions) {
+      var ref = this;
+      var cache = ref.cache;
+      var keys = ref.keys;
+      // 这一步是关键，vue 根据 vnode.key 识别不同的 vnode
+      var key$1 = vnode.key;
+      if (!key$1 || key$1.split('::')[0] !== 'arv') {
+        key$1 = [
+          'arv',
+          (window.history.state || {}).key || 'null',
+          componentOptions.Ctor.cid,
+          'props|' + (Object.entries(propsToPass || {}).map(function (item) { return item.join('='); }).join('&') || 'null')
+        ].join('::');
+        vnode.key = key$1;
+      }
+      if (cache[key$1]) {
+        var cached = cache[key$1];
+        vnode.componentInstance = cached.vnode.componentInstance;
+        remove(keys, key$1);
+        keys.push(key$1);
+        this.setScroll(cached);
+      } else {
+        var cached$1 = cache[key$1] = {
+          scroll: false,
+          vnode: vnode
+        };
+        this.$nextTick(function () {
+          cached$1.scrollTarget = getViewScrollTarget(this$1.$el);
+        });
+        keys.push(key$1);
+        // prune oldest entry
+        if (this.max && keys.length > parseInt(this.max)) {
+          pruneCacheEntry(cache, keys[0], keys, this._vnode);
+        }
+      }
+      this.currentKey = key$1;
+      vnode.data.keepAlive = true;
+    }
+    return vnode
+  },
+  methods: {
+    saveScroll: function saveScroll () {
+      var current = this.cache[this.currentKey];
+      if (current.scrollTarget){ current.scroll = getScroll(current.scrollTarget); }
+    },
+    setScroll: function setScroll (cached) {
+      this.$nextTick(function () {
+        if (cached.scrollTarget && cached.scroll) {
+          cached.scrollTarget.scrollTo(cached.scroll);
+          cached.scroll = false;
+        }
+      });
+    }
   }
+}
+
+function remove (arr, item) {
+  if (arr.length) {
+    var index = arr.indexOf(item);
+    if (index > -1) {
+      return arr.splice(index, 1)
+    }
+  }
+}
+
+function pruneCacheEntry (cache, key, keys, current) {
+  var cached = cache[key];
+  if (cached && (!current || cached.vnode.tag !== current.tag)) {
+    cached.vnode.componentInstance.$destroy();
+  }
+  cache[key] = null;
+  remove(keys, key);
 }
 
 function resolveProps (route, config) {
@@ -275,6 +580,7 @@ function createRoute (
     meta: (record && record.meta) || {},
     path: location.path || '/',
     hash: location.hash || '',
+    replace: location.replace || false,
     query: query,
     params: location.params || {},
     fullPath: getFullPath(location, stringifyQuery$$1),
@@ -564,6 +870,17 @@ function install (Vue) {
     }
   });
 
+  Vue.mixin({
+    beforeRouteUpdate: [function (to, from, next) {
+      this.$parent.saveScroll();
+      next();
+    }],
+    beforeRouteLeave: [function (to, from, next) {
+      this.$parent.saveScroll();
+      next();
+    }]
+  });
+
   Object.defineProperty(Vue.prototype, '$router', {
     get: function get () { return this._routerRoot._router }
   });
@@ -579,10 +896,6 @@ function install (Vue) {
   // use the same hook merging strategy for route hooks
   strats.beforeRouteEnter = strats.beforeRouteLeave = strats.beforeRouteUpdate = strats.created;
 }
-
-/*  */
-
-var inBrowser = typeof window !== 'undefined';
 
 /*  */
 
@@ -1542,190 +1855,6 @@ function resolveRecordPath (path, record) {
 
 /*  */
 
-var positionStore = Object.create(null);
-
-function setupScroll () {
-  // Fix for #1585 for Firefox
-  // Fix for #2195 Add optional third attribute to workaround a bug in safari https://bugs.webkit.org/show_bug.cgi?id=182678
-  window.history.replaceState({ key: getStateKey() }, '', window.location.href.replace(window.location.origin, ''));
-  window.addEventListener('popstate', function (e) {
-    saveScrollPosition();
-    if (e.state && e.state.key) {
-      setStateKey(e.state.key);
-    }
-  });
-}
-
-function handleScroll (
-  router,
-  to,
-  from,
-  isPop
-) {
-  if (!router.app) {
-    return
-  }
-
-  var behavior = router.options.scrollBehavior;
-  if (!behavior) {
-    return
-  }
-
-  if (process.env.NODE_ENV !== 'production') {
-    assert(typeof behavior === 'function', "scrollBehavior must be a function");
-  }
-
-  // wait until re-render finishes before scrolling
-  router.app.$nextTick(function () {
-    var position = getScrollPosition();
-    var shouldScroll = behavior.call(router, to, from, isPop ? position : null);
-
-    if (!shouldScroll) {
-      return
-    }
-
-    if (typeof shouldScroll.then === 'function') {
-      shouldScroll.then(function (shouldScroll) {
-        scrollToPosition((shouldScroll), position);
-      }).catch(function (err) {
-        if (process.env.NODE_ENV !== 'production') {
-          assert(false, err.toString());
-        }
-      });
-    } else {
-      scrollToPosition(shouldScroll, position);
-    }
-  });
-}
-
-function saveScrollPosition () {
-  var key = getStateKey();
-  if (key) {
-    positionStore[key] = {
-      x: window.pageXOffset,
-      y: window.pageYOffset
-    };
-  }
-}
-
-function getScrollPosition () {
-  var key = getStateKey();
-  if (key) {
-    return positionStore[key]
-  }
-}
-
-function getElementPosition (el, offset) {
-  var docEl = document.documentElement;
-  var docRect = docEl.getBoundingClientRect();
-  var elRect = el.getBoundingClientRect();
-  return {
-    x: elRect.left - docRect.left - offset.x,
-    y: elRect.top - docRect.top - offset.y
-  }
-}
-
-function isValidPosition (obj) {
-  return isNumber(obj.x) || isNumber(obj.y)
-}
-
-function normalizePosition (obj) {
-  return {
-    x: isNumber(obj.x) ? obj.x : window.pageXOffset,
-    y: isNumber(obj.y) ? obj.y : window.pageYOffset
-  }
-}
-
-function normalizeOffset (obj) {
-  return {
-    x: isNumber(obj.x) ? obj.x : 0,
-    y: isNumber(obj.y) ? obj.y : 0
-  }
-}
-
-function isNumber (v) {
-  return typeof v === 'number'
-}
-
-function scrollToPosition (shouldScroll, position) {
-  var isObject = typeof shouldScroll === 'object';
-  if (isObject && typeof shouldScroll.selector === 'string') {
-    var el = document.querySelector(shouldScroll.selector);
-    if (el) {
-      var offset = shouldScroll.offset && typeof shouldScroll.offset === 'object' ? shouldScroll.offset : {};
-      offset = normalizeOffset(offset);
-      position = getElementPosition(el, offset);
-    } else if (isValidPosition(shouldScroll)) {
-      position = normalizePosition(shouldScroll);
-    }
-  } else if (isObject && isValidPosition(shouldScroll)) {
-    position = normalizePosition(shouldScroll);
-  }
-
-  if (position) {
-    window.scrollTo(position.x, position.y);
-  }
-}
-
-/*  */
-
-var supportsPushState = inBrowser && (function () {
-  var ua = window.navigator.userAgent;
-
-  if (
-    (ua.indexOf('Android 2.') !== -1 || ua.indexOf('Android 4.0') !== -1) &&
-    ua.indexOf('Mobile Safari') !== -1 &&
-    ua.indexOf('Chrome') === -1 &&
-    ua.indexOf('Windows Phone') === -1
-  ) {
-    return false
-  }
-
-  return window.history && 'pushState' in window.history
-})();
-
-// use User Timing api (if present) for more accurate key precision
-var Time = inBrowser && window.performance && window.performance.now
-  ? window.performance
-  : Date;
-
-var _key = genKey();
-
-function genKey () {
-  return Time.now().toFixed(3)
-}
-
-function getStateKey () {
-  return _key
-}
-
-function setStateKey (key) {
-  _key = key;
-}
-
-function pushState (url, replace) {
-  saveScrollPosition();
-  // try...catch the pushState call to get around Safari
-  // DOM Exception 18 where it limits to 100 pushState calls
-  var history = window.history;
-  try {
-    if (replace) {
-      history.replaceState({ key: _key }, '', url);
-    } else {
-      _key = genKey();
-      history.pushState({ key: _key }, '', url);
-    }
-  } catch (e) {
-    window.location[replace ? 'replace' : 'assign'](url);
-  }
-}
-
-function replaceState (url) {
-  pushState(url, true);
-}
-
-/*  */
-
 function runQueue (queue, fn, cb) {
   var step = function (index) {
     if (index >= queue.length) {
@@ -1864,6 +1993,9 @@ var History = function History (router, base) {
   this.readyCbs = [];
   this.readyErrorCbs = [];
   this.errorCbs = [];
+  if (supportsPushState) {
+    setupScroll();
+  }
 };
 
 History.prototype.listen = function listen (cb) {
@@ -2154,22 +2286,22 @@ function poll (
 
 /*  */
 
-var HTML5History = /*@__PURE__*/(function (History$$1) {
+var HTML5History = (function (History$$1) {
   function HTML5History (router, base) {
     var this$1 = this;
 
     History$$1.call(this, router, base);
 
-    var expectScroll = router.options.scrollBehavior;
-    var supportsScroll = supportsPushState && expectScroll;
-
-    if (supportsScroll) {
-      setupScroll();
-    }
+    // const expectScroll = router.options.scrollBehavior
+    // const supportsScroll = supportsPushState && expectScroll
+    //
+    // if (supportsScroll) {
+    //   setupScroll()
+    // }
 
     var initLocation = getLocation(this.base);
     window.addEventListener('popstate', function (e) {
-      var current = this$1.current;
+      // const current = this.current
 
       // Avoiding first `popstate` event dispatched in some browsers but first
       // history route not updated since async guard at the same time.
@@ -2179,9 +2311,9 @@ var HTML5History = /*@__PURE__*/(function (History$$1) {
       }
 
       this$1.transitionTo(location, function (route) {
-        if (supportsScroll) {
-          handleScroll(router, route, current, true);
-        }
+        // if (supportsScroll) {
+        //   handleScroll(router, route, current, true)
+        // }
       });
     });
   }
@@ -2197,11 +2329,10 @@ var HTML5History = /*@__PURE__*/(function (History$$1) {
   HTML5History.prototype.push = function push (location, onComplete, onAbort) {
     var this$1 = this;
 
-    var ref = this;
-    var fromRoute = ref.current;
+    // const { current: fromRoute } = this
     this.transitionTo(location, function (route) {
       pushState(cleanPath(this$1.base + route.fullPath));
-      handleScroll(this$1.router, route, fromRoute, false);
+      // handleScroll(this.router, route, fromRoute, false)
       onComplete && onComplete(route);
     }, onAbort);
   };
@@ -2209,11 +2340,15 @@ var HTML5History = /*@__PURE__*/(function (History$$1) {
   HTML5History.prototype.replace = function replace (location, onComplete, onAbort) {
     var this$1 = this;
 
-    var ref = this;
-    var fromRoute = ref.current;
+    // const { current: fromRoute } = this
+    if (typeof (location) === 'string') {
+      location = { path: location, replace: true };
+    } else {
+      location.replace = true;
+    }
     this.transitionTo(location, function (route) {
       replaceState(cleanPath(this$1.base + route.fullPath));
-      handleScroll(this$1.router, route, fromRoute, false);
+      // handleScroll(this.router, route, fromRoute, false)
       onComplete && onComplete(route);
     }, onAbort);
   };
@@ -2242,7 +2377,7 @@ function getLocation (base) {
 
 /*  */
 
-var HashHistory = /*@__PURE__*/(function (History$$1) {
+var HashHistory = (function (History$$1) {
   function HashHistory (router, base, fallback) {
     History$$1.call(this, router, base);
     // check history fallback deeplinking
@@ -2261,23 +2396,23 @@ var HashHistory = /*@__PURE__*/(function (History$$1) {
   HashHistory.prototype.setupListeners = function setupListeners () {
     var this$1 = this;
 
-    var router = this.router;
-    var expectScroll = router.options.scrollBehavior;
-    var supportsScroll = supportsPushState && expectScroll;
-
-    if (supportsScroll) {
-      setupScroll();
-    }
+    // const router = this.router
+    // const expectScroll = router.options.scrollBehavior
+    // const supportsScroll = supportsPushState && expectScroll
+    //
+    // if (supportsScroll) {
+    //   setupScroll()
+    // }
 
     window.addEventListener(supportsPushState ? 'popstate' : 'hashchange', function () {
-      var current = this$1.current;
+      // const current = this.current
       if (!ensureSlash()) {
         return
       }
       this$1.transitionTo(getHash(), function (route) {
-        if (supportsScroll) {
-          handleScroll(this$1.router, route, current, true);
-        }
+        // if (supportsScroll) {
+        //   handleScroll(this.router, route, current, true)
+        // }
         if (!supportsPushState) {
           replaceHash(route.fullPath);
         }
@@ -2286,25 +2421,24 @@ var HashHistory = /*@__PURE__*/(function (History$$1) {
   };
 
   HashHistory.prototype.push = function push (location, onComplete, onAbort) {
-    var this$1 = this;
-
-    var ref = this;
-    var fromRoute = ref.current;
+    // const { current: fromRoute } = this
     this.transitionTo(location, function (route) {
       pushHash(route.fullPath);
-      handleScroll(this$1.router, route, fromRoute, false);
+      // handleScroll(this.router, route, fromRoute, false)
       onComplete && onComplete(route);
     }, onAbort);
   };
 
   HashHistory.prototype.replace = function replace (location, onComplete, onAbort) {
-    var this$1 = this;
-
-    var ref = this;
-    var fromRoute = ref.current;
+    // const { current: fromRoute } = this
+    if (typeof (location) === 'string') {
+      location = { path: location, replace: true };
+    } else {
+      location.replace = true;
+    }
     this.transitionTo(location, function (route) {
       replaceHash(route.fullPath);
-      handleScroll(this$1.router, route, fromRoute, false);
+      // handleScroll(this.router, route, fromRoute, false)
       onComplete && onComplete(route);
     }, onAbort);
   };
@@ -2395,7 +2529,7 @@ function replaceHash (path) {
 
 /*  */
 
-var AbstractHistory = /*@__PURE__*/(function (History$$1) {
+var AbstractHistory = (function (History$$1) {
   function AbstractHistory (router, base) {
     History$$1.call(this, router, base);
     this.stack = [];
@@ -2664,7 +2798,7 @@ function createHref (base, fullPath, mode) {
 }
 
 VueRouter.install = install;
-VueRouter.version = '3.0.6';
+VueRouter.version = '3.0.11';
 
 if (inBrowser && window.Vue) {
   window.Vue.use(VueRouter);

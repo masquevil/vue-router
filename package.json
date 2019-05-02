@@ -1,8 +1,11 @@
 {
-  "name": "vue-router",
-  "version": "3.0.6",
-  "description": "Official router for Vue.js 2",
-  "author": "Evan You",
+  "name": "vue-state-router",
+  "version": "3.0.11",
+  "description": "A better version for official vue-router@3",
+  "author": [
+    "Evan You",
+    "Soulran"
+  ],
   "license": "MIT",
   "main": "dist/vue-router.common.js",
   "module": "dist/vue-router.esm.js",
@@ -11,7 +14,7 @@
   "sideEffects": false,
   "repository": {
     "type": "git",
-    "url": "https://github.com/vuejs/vue-router.git"
+    "url": "https://github.com/masquevil/vue-router.git"
   },
   "typings": "types/index.d.ts",
   "files": [
