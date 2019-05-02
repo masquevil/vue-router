@@ -53,14 +53,18 @@ const supportsPushState = inBrowser && (function () {
 // use User Timing api (if present) for more accurate key precision
 const Time = Date;
 
-let _key = genKey();
+let _key;
+{
+  const { controller } = window.history.state || {};
+  _key = controller === 'vue-state-router' ? window.history.state.key : genKey();
+}
 
 function genKey () {
   return Time.now().toFixed(3)
 }
 
-function getStateKey () {
-  return _key
+function state () {
+  return { controller: 'vue-state-router', key: _key }
 }
 
 function setStateKey (key) {
@@ -74,10 +78,10 @@ function pushState (url, replace) {
   const history = window.history;
   try {
     if (replace) {
-      history.replaceState(history.state, '', url);
+      history.replaceState(Object.assign(state(), history.state), null, url);
     } else {
       _key = genKey();
-      history.pushState({ key: _key }, '', url);
+      history.pushState(state(), null, url);
     }
   } catch (e) {
     window.location[replace ? 'replace' : 'assign'](url);
@@ -95,10 +99,10 @@ function replaceState (url) {
 function setupScroll () {
   // Fix for #1585 for Firefox
   // Fix for #2195 Add optional third attribute to workaround a bug in safari https://bugs.webkit.org/show_bug.cgi?id=182678
-  window.history.replaceState({ key: getStateKey() }, '', window.location.href.replace(window.location.origin, ''));
+  replaceState(window.location.href.replace(window.location.origin, ''));
   window.addEventListener('popstate', e => {
     // saveScrollPosition()
-    if (e.state && e.state.key) {
+    if (e.state && e.state.controller === 'vue-state-router') {
       setStateKey(e.state.key);
     }
   });

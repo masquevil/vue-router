@@ -21,10 +21,18 @@ export const supportsPushState = inBrowser && (function () {
 // use User Timing api (if present) for more accurate key precision
 const Time = Date
 
-let _key: string = genKey()
+let _key: string
+{
+  const { controller } = window.history.state || {}
+  _key = controller === 'vue-state-router' ? window.history.state.key : genKey()
+}
 
 function genKey (): string {
   return Time.now().toFixed(3)
+}
+
+function state () {
+  return { controller: 'vue-state-router', key: _key }
 }
 
 export function getStateKey () {
@@ -42,10 +50,10 @@ export function pushState (url?: string, replace?: boolean) {
   const history = window.history
   try {
     if (replace) {
-      history.replaceState(history.state, '', url)
+      history.replaceState(Object.assign(state(), history.state), null, url)
     } else {
       _key = genKey()
-      history.pushState({ key: _key }, '', url)
+      history.pushState(state(), null, url)
     }
   } catch (e) {
     window.location[replace ? 'replace' : 'assign'](url)
