@@ -1,6 +1,6 @@
 /*!
-  * vue-router v3.0.9
-  * (c) 2018 Evan You
+  * vue-router v3.0.11
+  * (c) 2019 Evan You
   * @license MIT
   */
 (function (global, factory) {
@@ -260,16 +260,18 @@ var View = {
       default: 0
     }
   },
-  created: function created(){
+  created: function created () {
     extend(this, {
       cache: Object.create(null),
       keys: [],
-      currentKey: '',
+      currentKey: ''
     });
   },
-  destroyed: function destroyed(){
-    for (var key in this.cache) {
-      pruneCacheEntry(this.cache, key, this.keys);
+  destroyed: function destroyed () {
+    var this$1 = this;
+
+    for (var key in this$1.cache) {
+      pruneCacheEntry(this$1.cache, key, this$1.keys);
     }
   },
   render: function render (_) {
@@ -305,7 +307,9 @@ var View = {
 
     // render previous view if the tree is inactive and kept-alive
     if (inactive) {
-      return h(rvCache[name], data, children)
+      var vnode$1 = h(rvCache[name], data, children);
+      vnode$1.key = this.currentKey;
+      return vnode$1
     }
 
     var matched = route.matched[depth];
@@ -353,19 +357,19 @@ var View = {
 
     var vnode = h(component, data, children);
     var componentOptions = vnode && vnode.componentOptions;
-    if(componentOptions){
+    if (componentOptions) {
       var ref = this;
       var cache = ref.cache;
       var keys = ref.keys;
-      var currentKey = ref.currentKey;
       // 这一步是关键，vue 根据 vnode.key 识别不同的 vnode
       var key$1 = vnode.key;
-      if(!key$1 || key$1.split('::')[0] !== 'router-alive'){
+      if (!key$1 || key$1.split('::')[0] !== 'arv') {
         key$1 = [
           'arv',
           (window.history.state || {}).key || 'null',
           componentOptions.Ctor.cid,
-          'props|' + (Object.entries(propsToPass || {}).map(function (item) { return item.join('='); }).join('&') || 'null') ].join('::');
+          'props|' + (Object.entries(propsToPass || {}).map(function (item) { return item.join('='); }).join('&') || 'null')
+        ].join('::');
         vnode.key = key$1;
       }
       if (cache[key$1]) {
@@ -391,16 +395,16 @@ var View = {
       this.currentKey = key$1;
       vnode.data.keepAlive = true;
     }
-    return vnode;
+    return vnode
   },
   methods: {
-    saveScroll: function saveScroll(){
+    saveScroll: function saveScroll () {
       var current = this.cache[this.currentKey];
-      if(current.scrollTarget){ current.scroll = getScroll(current.scrollTarget); }
+      if (current.scrollTarget){ current.scroll = getScroll(current.scrollTarget); }
     },
-    setScroll: function setScroll(cached){
+    setScroll: function setScroll (cached) {
       this.$nextTick(function () {
-        if(cached.scrollTarget && cached.scroll){
+        if (cached.scrollTarget && cached.scroll) {
           cached.scrollTarget.scrollTo(cached.scroll);
           cached.scroll = false;
         }
@@ -409,7 +413,7 @@ var View = {
   }
 }
 
-function remove(arr, item){
+function remove (arr, item) {
   if (arr.length) {
     var index = arr.indexOf(item);
     if (index > -1) {
@@ -418,7 +422,7 @@ function remove(arr, item){
   }
 }
 
-function pruneCacheEntry(cache, key, keys, current){
+function pruneCacheEntry (cache, key, keys, current) {
   var cached = cache[key];
   if (cached && (!current || cached.vnode.tag !== current.tag)) {
     cached.vnode.componentInstance.$destroy();
@@ -1397,16 +1401,24 @@ function fillParams (
   params,
   routeMsg
 ) {
+  params = params || {};
   try {
     var filler =
       regexpCompileCache[path] ||
       (regexpCompileCache[path] = pathToRegexp_1.compile(path));
-    return filler(params || {}, { pretty: true })
+
+    // Fix #2505 resolving asterisk routes { name: 'not-found', params: { pathMatch: '/not-found' }}
+    if (params.pathMatch) { params[0] = params.pathMatch; }
+
+    return filler(params, { pretty: true })
   } catch (e) {
     {
       warn(false, ("missing param for " + routeMsg + ": " + (e.message)));
     }
     return ''
+  } finally {
+    // delete the 0 if it was added
+    delete params[0];
   }
 }
 
@@ -2262,7 +2274,7 @@ function poll (
 
 /*  */
 
-var HTML5History = /*@__PURE__*/(function (History$$1) {
+var HTML5History = (function (History$$1) {
   function HTML5History (router, base) {
     var this$1 = this;
 
@@ -2355,7 +2367,7 @@ function getLocation (base) {
 
 /*  */
 
-var HashHistory = /*@__PURE__*/(function (History$$1) {
+var HashHistory = (function (History$$1) {
   function HashHistory (router, base, fallback) {
     History$$1.call(this, router, base);
     // check history fallback deeplinking
@@ -2493,7 +2505,7 @@ function replaceHash (path) {
 
 /*  */
 
-var AbstractHistory = /*@__PURE__*/(function (History$$1) {
+var AbstractHistory = (function (History$$1) {
   function AbstractHistory (router, base) {
     History$$1.call(this, router, base);
     this.stack = [];
@@ -2749,7 +2761,7 @@ function createHref (base, fullPath, mode) {
 }
 
 VueRouter.install = install;
-VueRouter.version = '3.0.9';
+VueRouter.version = '3.0.11';
 
 if (inBrowser && window.Vue) {
   window.Vue.use(VueRouter);

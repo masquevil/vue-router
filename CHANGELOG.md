@@ -1,3 +1,9 @@
+# [3.0.11](https://github.com/masquevil/vue-state-router/compare/v3.0.3...v3.0.11) (2018-11-23)
+
+### Bug Fixes
+
+- 修复多级 router-view 嵌套时视图被反复创建的 bug
+
 # [3.0.2](https://github.com/vuejs/vue-router/compare/v3.0.1...v3.0.2) (2018-11-23)
 
 ### Bug Fixes

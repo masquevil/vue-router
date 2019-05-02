@@ -1,6 +1,6 @@
 import { warn } from '../util/warn'
 import { extend } from '../util/misc'
-import { getViewScrollTarget, getScroll } from '../util/scroll';
+import { getViewScrollTarget, getScroll } from '../util/scroll'
 
 export default {
   name: 'RouterView',
@@ -14,21 +14,21 @@ export default {
       default: 0
     }
   },
-  created(){
+  created () {
     extend(this, {
       cache: Object.create(null),
       keys: [],
-      currentKey: '',
-    });
+      currentKey: ''
+    })
   },
-  destroyed(){
-    for (let key in this.cache) {
+  destroyed () {
+    for (const key in this.cache) {
       pruneCacheEntry(this.cache, key, this.keys)
     }
   },
   render (_) {
     const children = this.$slots.default
-    const data = {};
+    const data = {}
     // used by devtools to display a router-view badge
     data.routerView = true
 
@@ -57,7 +57,9 @@ export default {
 
     // render previous view if the tree is inactive and kept-alive
     if (inactive) {
-      return h(rvCache[name], data, children)
+      const vnode = h(rvCache[name], data, children)
+      vnode.key = this.currentKey
+      return vnode
     }
 
     const matched = route.matched[depth]
@@ -89,7 +91,7 @@ export default {
     }
 
     // resolve props
-    let propsToPass = data.props = extend(resolveProps(route, matched.props && matched.props[name]), this.$attrs);
+    let propsToPass = data.props = extend(resolveProps(route, matched.props && matched.props[name]), this.$attrs)
     if (propsToPass) {
       // clone to prevent mutation
       propsToPass = data.props = extend({}, propsToPass)
@@ -103,63 +105,63 @@ export default {
       }
     }
 
-    const vnode = h(component, data, children);
-    const componentOptions = vnode && vnode.componentOptions;
-    if(componentOptions){
-      const { cache, keys, currentKey } = this;
+    const vnode = h(component, data, children)
+    const componentOptions = vnode && vnode.componentOptions
+    if (componentOptions) {
+      const { cache, keys } = this
       // 这一步是关键，vue 根据 vnode.key 识别不同的 vnode
-      let key = vnode.key;
-      if(!key || key.split('::')[0] !== 'router-alive'){
+      let key = vnode.key
+      if (!key || key.split('::')[0] !== 'arv') {
         key = [
           'arv',
           (window.history.state || {}).key || 'null',
           componentOptions.Ctor.cid,
-          'props|' + (Object.entries(propsToPass || {}).map(item => item.join('=')).join('&') || 'null'),
-        ].join('::');
-        vnode.key = key;
+          'props|' + (Object.entries(propsToPass || {}).map(item => item.join('=')).join('&') || 'null')
+        ].join('::')
+        vnode.key = key
       }
       if (cache[key]) {
-        let cached = cache[key];
-        vnode.componentInstance = cached.vnode.componentInstance;
-        remove(keys, key);
-        keys.push(key);
-        this.setScroll(cached);
+        const cached = cache[key]
+        vnode.componentInstance = cached.vnode.componentInstance
+        remove(keys, key)
+        keys.push(key)
+        this.setScroll(cached)
       } else {
-        let cached = cache[key] = {
+        const cached = cache[key] = {
           scroll: false,
           vnode: vnode
-        };
+        }
         this.$nextTick(() => {
-          cached.scrollTarget = getViewScrollTarget(this.$el);
-        });
-        keys.push(key);
+          cached.scrollTarget = getViewScrollTarget(this.$el)
+        })
+        keys.push(key)
         // prune oldest entry
         if (this.max && keys.length > parseInt(this.max)) {
           pruneCacheEntry(cache, keys[0], keys, this._vnode)
         }
       }
-      this.currentKey = key;
-      vnode.data.keepAlive = true;
+      this.currentKey = key
+      vnode.data.keepAlive = true
     }
-    return vnode;
+    return vnode
   },
   methods: {
-    saveScroll(){
-      let current = this.cache[this.currentKey];
-      if(current.scrollTarget)current.scroll = getScroll(current.scrollTarget);
+    saveScroll () {
+      const current = this.cache[this.currentKey]
+      if (current.scrollTarget)current.scroll = getScroll(current.scrollTarget)
     },
-    setScroll(cached){
+    setScroll (cached) {
       this.$nextTick(() => {
-        if(cached.scrollTarget && cached.scroll){
-          cached.scrollTarget.scrollTo(cached.scroll);
-          cached.scroll = false;
+        if (cached.scrollTarget && cached.scroll) {
+          cached.scrollTarget.scrollTo(cached.scroll)
+          cached.scroll = false
         }
-      });
+      })
     }
   }
 }
 
-function remove(arr, item){
+function remove (arr, item) {
   if (arr.length) {
     const index = arr.indexOf(item)
     if (index > -1) {
@@ -168,13 +170,13 @@ function remove(arr, item){
   }
 }
 
-function pruneCacheEntry(cache, key, keys, current){
-  const cached = cache[key];
+function pruneCacheEntry (cache, key, keys, current) {
+  const cached = cache[key]
   if (cached && (!current || cached.vnode.tag !== current.tag)) {
-    cached.vnode.componentInstance.$destroy();
+    cached.vnode.componentInstance.$destroy()
   }
-  cache[key] = null;
-  remove(keys, key);
+  cache[key] = null
+  remove(keys, key)
 }
 
 function resolveProps (route, config) {
